@@ -1,9 +1,10 @@
 import cv2
 import colorsys
+import solver
+import serial
 
-
-cap = cv2.VideoCapture(0)
-green = [120,255,255]    
+cap = cv2.VideoCapture(2 )
+green = [100,255,255]    
 blue = [160,50,50]      
 yellow = [40,255,255]     
 white = [0,5,5]  
@@ -27,33 +28,30 @@ def colorFix(color):
     print(color)
     color = list(color)
     # Depend on the color code in HSV, we classify them into 6 different color
-    if (color>[yellow[0]-15,50,50]) and color < [yellow[0]+15,255,255]:
-        print('Yellow')
-        return yellow_bgr
-    elif (color>[orange[0]-10,50,50]) and color < [orange[0]+10,255,255]:
-        print('Orange')
-        return orange_bgr
-    elif ((color<[6,255,255]) and color > [0,255,255]) or (color>[230,100,100]) and color < [254,255,255]:
-        print('Red')
-        return red_bgr
-    elif(color[2]>=150) and color[1]<100:
+    if(color[2]>=150) and color[1]<80 :
         print('White')
         return white_bgr
-    elif (color>[green[0]-15,50,50]) and color < [green[0]+25,255,255]:
+    elif (color>[yellow[0]-15,50,50]) and color < [yellow[0]+20,255,255]:
+        print('Yellow')
+        return yellow_bgr
+    elif (color>[orange[0]-7,50,50]) and color < [orange[0]+10,255,255]:
+        print('Orange')
+        return orange_bgr
+    elif ((color<[9,255,255]) and color > [0,50,50]) or (color>[200,100,100]) and color < [255,255,255]:
+        print('Red')
+        return red_bgr
+    elif (color>[green[0]-20,50,50]) and color < [green[0]+40,255,255]:
         print('Green')
         return green_bgr
-    elif (color>[blue[0]-5,50,50]) and color < [blue[0]+15,255,255]:
+    elif (color>[blue[0]-15,50,50]) and color < [blue[0]+15,255,255]:
         print('Blue')
         return blue_bgr
     
     else:
         return black
-    
-while True:
-    #Turn the capture into a frame
-    _, frame = cap.read()
-    
-    #Initialize the coordinates of the scanning pixel
+def read(frame):
+#Initialize the coordinates of the scanning pixel
+    c = [[]]
     X = 240
     Y = 100
     originX = (X,Y)
@@ -61,42 +59,79 @@ while True:
     X1 =((originX[0]+originY[0])/2)
     Y1 = ((originX[1]+originY[1])/2)
     origin = (int (X1),int (Y1))
-    
+
     #Take the center pixel of each square
+    
     cl1 = frame[int (Y1),int (X1)]
+    cl12 = frame[int (Y1)-20,int (X1)]
+    cl13 = frame[int (Y1)+20,int (X1)]    
+    cl11=cl1
+    cl1[0] = (cl11[0]/3+cl12[0]/3+cl13[0]/3)
     c1 = cl1.tolist()   #Convert the tuple into a list
     c1 = colorFix(c1)   #Turn the color of the pixel 
     
     
     cl2 = frame[int (Y1)+100,int (X1)]
+    cl22 = frame[int (Y1)+100-20,int (X1)]
+    cl23 = frame[int (Y1)+100+20,int (X1)]    
+    cl21=cl2
+    cl2[0] = (cl21[0]/3+cl22[0]/3+cl23[0]/3)
     c2 = cl2.tolist()
     c2 =  colorFix(c2)
     
     cl3 = frame[int (Y1)+200,int (X1)]
+    cl32 = frame[int (Y1)+200-20,int (X1)]
+    cl33 = frame[int (Y1)+200+20,int (X1)]    
+    cl31=cl3
+    cl3[0] = (cl31[0]/3+cl32[0]/3+cl33[0]/3)
     c3 = cl3.tolist()
     c3 =  colorFix(c3)
     
     cl4= frame[int (Y1),int (X1) +100]
+    cl42 = frame[int (Y1)-20,int (X1)+100]
+    cl43 = frame[int (Y1)+20,int (X1)+100]    
+    cl41=cl4
+    cl4[0] = (cl41[0]/3+cl42[0]/3+cl43[0]/3)
     c4 = cl4.tolist()
     c4 =  colorFix(c4)
     
     cl5 = frame[int (Y1)+100,int (X1)+100]
+    cl52 = frame[int (Y1)+100-20,int (X1)+100]
+    cl53 = frame[int (Y1)+100+20,int (X1)+100]    
+    cl51=cl5
+    cl5[0] = (cl51[0]/3+cl52[0]/3+cl53[0]/3)
     c5 = cl5.tolist()
     c5 =  colorFix(c5)
     
     cl6 = frame[int (Y1)+200,int (X1)+100]
+    cl62 = frame[int (Y1)+200-20,int (X1)+100]
+    cl63 = frame[int (Y1)+200+20,int (X1)+100]    
+    cl61=cl6
+    cl6[0] = (cl61[0]/3+cl62[0]/3+cl63[0]/3)
     c6 = cl6.tolist()
     c6 =  colorFix(c6)
     
     cl7 = frame[int (Y1),int (X1)+200]
+    cl72 = frame[int (Y1)-20,int (X1)+200]
+    cl73 = frame[int (Y1)+20,int (X1)+200]    
+    cl71=cl7
+    cl7[0] = (cl71[0]/3+cl72[0]/3+cl73[0]/3)
     c7 = cl7.tolist()
     c7 =  colorFix(c7)
     
     cl8 = frame[int (Y1)+100,int (X1)+200]
+    cl82 = frame[int (Y1)+100-20,int (X1)+200]
+    cl83 = frame[int (Y1)+100+20,int (X1)+200]    
+    cl81=cl8
+    cl8[0] = (cl81[0]/3+cl82[0]/3+cl83[0]/3)
     c8 = cl8.tolist()
     c8 =  colorFix(c8)
     
     cl9 = frame[int (Y1)+200,int (X1)+200]
+    cl92 = frame[int (Y1)+200-20,int (X1)+200]
+    cl93 = frame[int (Y1)+200+20,int (X1)+200]    
+    cl91=cl9
+    cl9[0] = (cl91[0]/3+cl92[0]/3+cl93[0]/3)
     c9 = cl9.tolist()
     c9 =  colorFix(c9)
  
@@ -131,9 +166,143 @@ while True:
     
     # Show the frame to scan
     cv2.imshow('Frame',frame)
-    
+    s=''
+    s+=check(c1)
+    s+=check(c4)
+    s+=check(c7)
+    s+=check(c2)
+    s+=check(c5)
+    s+=check(c8)
+    s+=check(c3)
+    s+=check(c6)
+    s+=check(c9) 
+    return s
+def check(c):
+    if c == green_bgr:
+        return 'R'
+    if c == blue_bgr:
+        return 'L'
+    if c == red_bgr:
+        return 'F'
+    if c == orange_bgr:
+         return 'B'
+    if c == yellow_bgr:
+        return 'U'
+    if c == white_bgr:
+        return 'D'
+    else:
+        return'M'
+while True:
+    #Turn the capture into a frame
+    s='M'*54
+    _, frame = cap.read()
+    c = read(frame)
     k = cv2.waitKey(5) & 0xFF
+    n=0
+    if k == ord(" "):
+        count = 0
+        print('Enter input mode')
+        while(count<6):
+            _, frame = cap.read()
+            c = read(frame)
+            key = cv2.waitKey(5) & 0xFF
+            print(count)
+            if key == ord(" "):
+                s2=''
+                s2 = s2+c
+                if s2[4]=='U':
+                    s=s2[0:9] + s[9:54]
+                    count+=1
+                    
+                elif s2[4]=='R':
+                    s=s[0:9] + s2[0:9] + s[18:54]
+                    count+=1
+                    
+                elif s2[4]=='F':
+                    s=s[0:18] + s2[0:9] + s[27:54]
+                    count+=1
+                    
+                elif s2[4]=='D':
+                    s=s[0:27] + s2[0:9] + s[36:54]
+                    count+=1
+                        
+                elif s2[4]=='L':
+                    s=s[0:36] + s2[0:9] + s[45:54]
+                    count+=1
+                        
+                elif s2[4]=='B':
+                    s=s[0:45] + s2[0:9]
+                    count+=1
+                print(s2)
+            print('123456789123456789123456789123456789123456789123456789')
+            print(s)
+        k=27   
     if k == 27:
         break
+print(s)
+solution = ''
+solution += solver.solve(s, 20, 2)
+print(solution)
+'''
+d=' '
+i=0
+ser= serial.Serial('COM10',9600)
+while d[0] != '(':
+    d=solution[i:i+2]
+    if d == 'R1':
+        ser.write(1)
+        i+=2
+    if d == 'R2':
+        ser.write(2)
+        i+=2
+    if d == 'R3':
+        ser.write(3)
+        i+=2
+    if d == 'L1':
+        ser.write(4)
+        i+=2
+    if d == 'L2':
+        ser.write(5)
+        i+=2
+    if d == 'L3':
+        ser.write(6)
+        i+=2
+    if d == 'F1':
+        ser.write(7)
+        i+=2
+    if d == 'F2':
+        ser.write(8)
+        i+=2
+    if d == 'F3':
+        ser.write(9)
+        i+=2
+    if d == 'B1':
+        ser.write(10)
+        i+=2
+    if d == 'B2':
+        ser.write(11)
+        i+=2
+    if d == 'B3':
+        ser.write(12)
+        i+=2
+    if d == 'U1':
+        ser.write(13)
+        i+=2
+    if d == 'U2':
+        ser.write(14)
+        i+=2
+    if d == 'U3':
+        ser.write(15)
+        i+=2
+    if d == 'D1':
+        ser.write(16)
+        i+=2
+    if d == 'D2':
+        ser.write(17)
+        i+=2
+    if d == 'D3':
+        ser.write(18)
+        i+=2
+'''
 cv2.destroyAllWindows()
 cap.release()
